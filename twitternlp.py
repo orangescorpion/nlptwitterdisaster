@@ -6,6 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
+import scipy.sparse
 
 # Data load
 train = pd.read_csv("train.csv", index_col="id") # read training dataset
@@ -13,10 +14,10 @@ test = pd.read_csv("test.csv", index_col="id") # read test dataset
 # Bag of words for training set
 count_vectorizer=feature_extraction.text.CountVectorizer() # from sklearn
 trainvectors = count_vectorizer.fit_transform(train["text"]) # vectorise the entire training set
-trainingset = pd.DataFrame({'text': trainvectors, 'target': train["target"]})
+
 # print(type(trainvectors))
 # print(testvectors.shape)
-train_train, train_test = train_test_split(trainingset, train_size=0.7, random_state=42) #split the dataset for CV
+train_train, train_test = train_test_split(trainvectors, train_size=0.7, random_state=42) #split the dataset for CV
 # print(train_train.info())
 
 
@@ -33,11 +34,11 @@ rf=RandomForestClassifier() # Random Forest
 mlp=MLPClassifier() # multi layer perceptron classifier
 knn=KNeighborsClassifier() # K Nearest Neighbours
 #naive = nltk.classify.NaiveBayesClassifier() # Naive Bayes
-train_targets = pd.Series.to_numpy(train_test["target"]) # creates a numpy array for comparison to predictions
+train_targets = pd.Series.to_numpy(train["target"]) # creates a numpy array for comparison to predictions
 
 # Ridge regression model fitting
-lrdge.fit(train_train["text"], train_train["target"]) # fits model on training data
-lrdge_pred = lrdge.predict([train_test["text"]]) # Makes predictions based on fitted model
+lrdge.fit(trainvectors, train["target"]) # fits model on training data
+lrdge_pred = lrdge.predict(trainvectors) # Makes predictions based on fitted model
 
 lrdge_accuracy = 0
 for x in lrdge_pred:

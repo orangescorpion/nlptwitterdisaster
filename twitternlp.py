@@ -19,15 +19,18 @@ traintext.info()
 
 ### Data processing
 
-# TODO: create datasets of n-grams and target ?
-# TODO: word2vec ?
+# TODO: consider capitalization because this will count as different words (but then again all caps might be significant)
+# TODO: consider stemming/lemmatization
 
-# TODO: create DTM
+# TODO: n-grams, word2vec ?
+
+# create bag of words
 count_vectorizer=feature_extraction.text.CountVectorizer() # from sklearn
 
 trainvectors = count_vectorizer.fit_transform(traintext["text"])
 testvectors = count_vectorizer.fit_transform(test["text"])
 print(trainvectors.shape)
+print(testvectors.shape)
 
 
 ### Model training
@@ -36,13 +39,14 @@ logistic=LogisticRegression() # Logistic
 rf=RandomForestClassifier() # Random Forest
 mlp=MLPClassifier() # multi layer perceptron classifier
 knn=KNeighborsClassifier() # K Nearest Neighbours
-naive = nltk.classify.NaiveBayesClassifier() # Naive Bayes
+
+#naive = nltk.classify.NaiveBayesClassifier() # Naive Bayes
 
 # Model fitting
-lrdge.fit(trainvectors, train["target"])
+#lrdge.fit(trainvectors, train["target"])
 
 # Model assessment
-lrdge_pred = lrdge.predict(trainvectors) # Then take difference bewteen expected and actual
+#lrdge_pred = lrdge.predict(trainvectors) # Then take difference bewteen expected and actual
 
 # Model prediction with best model
 

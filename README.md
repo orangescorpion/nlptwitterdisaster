@@ -1,5 +1,5 @@
 # nlptwitterdisaster
-Natural Language Processing with Disaster Tweets for introduction to Kaggle competitions
+Natural Language Processing with Disaster Tweets (https://www.kaggle.com/competitions/nlp-getting-started) is an ongoing Kaggle competition for newcomers to Kaggle and ML beginners. This project contains my solution.
 
 # Modules used
 ## Pandas

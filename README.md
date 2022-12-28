@@ -2,7 +2,7 @@
 Natural Language Processing with Disaster Tweets (https://www.kaggle.com/competitions/nlp-getting-started) is an ongoing Kaggle competition for newcomers to Kaggle and ML beginners. This project contains my solution.
 
 # Modules used
-## Pandas
+## pandas
 The development of pandas began in 2008 and is now an open-source project aimed at being the most powerful data analysis/manipulation tool. It has its own DataFrame object and is capable of reading and writing files as well as pivoting, merging, indexing, and subsetting datasets.
 
 ## scikit-learn
@@ -24,9 +24,11 @@ Stemming is the process of reducing words to their roots/stems. For example, "le
 Lemmatization is the process of changing words to their lemma form (the base dictionary meaning of the word). For example, "is", "are", and "am" would all become "be". Lemmatization can be more time consuming than stemming and requires a dictionary with a morphological understanding of words.
 
 # Natural Language Processing techniques
-## Markov models
+## Ordered text: Markov models and n-grams
+For NLP that is used to generate text or validate grammar, the order of words is important. n-grams are ordered sequences of n items from a sequence. They are used to determine words or letters that are commonly found together.
 
-## Bag of words
+## Unordered text: bag of words
+For classification and prediction, the order of words in a sentence is less necessary than for other AI applications such as translation or chatbots. By representing text as an unordered collection of words, text can be represented as numerical vectors which are used to train models. An emphasis can be placed on term frequency rather than sequences.
 
 ## Models Used
-
+TODO

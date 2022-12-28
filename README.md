@@ -1,24 +1,24 @@
 # nlptwitterdisaster
 Natural Language Processing with Disaster Tweets for introduction to Kaggle competitions
 
-## Modules
-# Numpy
+# Modules
+## Numpy
 
-# Pandas
+## Pandas
 
-# scikit-learn
+## scikit-learn
 
-# nltk
+## nltk
 
-## Data processing
-# Dealing with capitalization
+# Data processing
+## Dealing with capitalization
 
-# Punctuation
+## Punctuation
 
-# Stemming/Lemmatization
+## Stemming/Lemmatization
 
-## Natural Language Processing techniques
-# Bag of words
+# Natural Language Processing techniques
+## Bag of words
 
 ## Models Used
 

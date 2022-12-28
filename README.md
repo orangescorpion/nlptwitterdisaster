@@ -19,9 +19,13 @@ Since ML models will treat capital letters as distinct characters from lowercase
 When separating a sentence into separate words to create word count vectors, spaces are used to distinguish separate words. So a sentence like "sadly, I won't be here" would turn into the array ["sadly,", "I", "won't", "be", "here"]. Evidently, "sadly," includes the comma which would make it a different word from "sadly". For this reason, punctuation is removed as part of the data cleaning stage. Important to note that if all punctuation is removed, words like "o'clock" will become "oclock".
 
 ## Stemming/Lemmatization
+Stemming is the process of reducing words to their roots/stems. For example, "leader", "leading", "leads" would all become "lead". Words are not always reduced to a dictionary word, however, "troubling", "trouble" and "troubled" all become "troubl". For machine learning purposes, stemming can reduce redundancy, thereby producing more robust models. There are several popular algorithms for stemming.
 
+Lemmatization is the process of changing words to their lemma form (the base dictionary meaning of the word). For example, "is", "are", and "am" would all become "be". Lemmatization can be more time consuming than stemming and requires a dictionary with a morphological understanding of words.
 
 # Natural Language Processing techniques
+## Markov models
+
 ## Bag of words
 
 ## Models Used

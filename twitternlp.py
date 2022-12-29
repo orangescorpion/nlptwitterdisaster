@@ -1,5 +1,6 @@
 # imports
 import pandas as pd # data processing, I/O
+import numpy as np
 from sklearn import feature_extraction, linear_model, model_selection, preprocessing # ML library
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
@@ -21,10 +22,11 @@ trainvectors = count_vectorizer.fit_transform(train["text"]) # vectorise the ent
 df = pd.DataFrame(trainvectors.toarray())
 df["target"]=pd.Series.to_numpy(train["target"]) # full dataset vectorised with target
 # datasets for holdout
-train_train, train_test = train_test_split(df, train_size=0.7, random_state=42) #split the dataset
-trainx = train_train[train_train.columns.difference(["target"])] # Training data minus target
-train_testy = train_test[train_test.columns.difference(["target"])] # Test data minus target
-train_targets = pd.Series.to_numpy(train_test["target"]) # creates a numpy array for comparison to predictions
+train_train, train_test = train_test_split(df, train_size=0.8, random_state=42) #split the dataset
+holdx = train_train[train_train.columns.difference(["target"])] # Training data minus target
+holdy = pd.Series.to_numpy(train_train["target"])
+testx = train_test[train_test.columns.difference(["target"])] # Test data minus target
+testy = pd.Series.to_numpy(train_test["target"])
 # datasets for CV
 cv_x = df[df.columns.difference(["target"])]
 cv_y = pd.Series.to_numpy(train["target"])
@@ -47,13 +49,13 @@ def accuracy(predicted, actual): # Function to return accuracy of predicted to a
     for x in predicted:
         if predicted[x] == actual[x]:
             accuracy += 1
-    accuracy = (accuracy/len(predicted))*100
+    accuracy = (accuracy/len(predicted))
     return accuracy
 
 # Ridge regression model fitting holdout
-lrdge.fit(trainx, train_train["target"]) # fits model on training data
-lrdge_pred = lrdge.predict(train_testy) # Makes predictions based on fitted model
-print("Ridge regression accuracy: "+str(accuracy(lrdge_pred, train_targets))) # Print accuracy for model
+lrdge.fit(holdx, holdy) # fits model on training data
+lrdge_pred = lrdge.predict(testx) # Makes predictions based on fitted model
+print("Ridge regression accuracy: "+str(accuracy(lrdge_pred, testy))) # Print accuracy for model
 
 ### Cross validation models
 logistic_cv = linear_model.LogisticRegressionCV(max_iter = 100, solver = 'sag')
@@ -69,15 +71,19 @@ ridge_cv = linear_model.RidgeClassifierCV(alphas = (0.1, 0.5, 0.7, 1, 3, 5, 7, 1
 # print("Ridge CV score: "+str(ridge_cv.score(cv_x, cv_y))) # 94.8
 
 ### Unsupervised models
-sgd = linear_model.SGDClassifier(loss = "log_loss")
+sgd = linear_model.SGDClassifier(loss = "log_loss", n_iter_no_change= 10, max_iter = int(np.ceil((10**6)/len(testy))), penalty = 'l2',
+                                    alpha = 0.0005)
 
 #sgd
-sgd.fit(cv_x, cv_y)
-print("SGD score: "+str(sgd.score(cv_x, cv_y))) # 98.0
+sgd.fit(holdx, holdy)
+print("SGD score: "+str(sgd.score(testx, testy)))
+# TODO: GridSearchCV or RandomizedSearchCV to choose alpha
+# TODO: data should be scaled to [0,1] or [-1,1] or standardize to mean 0 variance 1 for sgd
 
 ### Final fitting using best model on submission data
+sgd.fit(df[df.columns.difference(["target"])], df["target"])
 results = sgd.predict(testdf)
 resultsdf = pd.DataFrame({'id': test["id"], 'target': results})
 
-# TODO: Save final prediction as submission.csv
+### Save final prediction as submission.csv
 resultsdf.to_csv('submission.csv', index = False)

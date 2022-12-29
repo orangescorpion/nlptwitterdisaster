@@ -30,5 +30,26 @@ For NLP that is used to generate text or validate grammar, the order of words is
 ## Unordered text: bag of words
 For classification and prediction, the order of words in a sentence is less necessary than for other AI applications such as translation or chatbots. By representing text as an unordered collection of words, text can be represented as numerical vectors which are used to train models. An emphasis can be placed on term frequency rather than sequences.
 
-## Models Used
-TODO
+# Models Used
+## Ridge Regression Classification
+Ridge classification is used to analyse linear discriminant models. It is a form of regularisation that prevents overfitting by penalizing model coefficients (adding a penalty term to the cost function that discourages complexity). The penalty term is typically the sum of squared coefficients of the features in the model. By increasing the penalty term, regularization is increased resulting in smaller coefficient values. Can be beneficial when training data is small in size.
+### Assumptions
+Assumptions are similar to linear regression: linearity, constant variance, and independence. However, normal distribution of errors is not necessary as ridge does not provide CIs.
+### Loss function
+Mean square loss with L2 regularization as penalty term
+### Prediction
+Outputs are between -1 and 1 and classification is based on greater than or less than 0.
+### Multiclass prediction
+In multiclass prediction, each class is treated as a separate binary outcome.
+### Parameters (scikit-learn)
+#### alpha
+Alpha is the regularization strength, must be a positive float, larger values correspond to stronger regularization
+#### solver
+Solver to use in the computational routines
+ - auto (default): chooses automatically based on data type
+ - svd: Singular Value Decomposition of X, most stable solver particularly moreso than 'cholesky' for singular matrices but slower
+ - cholesky: uses standard scipy.linalg.solve function to obtain closed-form solution
+ - sparse_cg: uses the conjugate gradient solver as found in scipy.sparse.linalg.cg. As an iterative algorithm, this solver is more appropriate than ‘cholesky’ for large-scale data
+ - lsqr: dedicated regularized least-squares routine scipy.sparse.linalg.lsqr. Fastest and uses iterative approach
+ - sag: Stochastic Average Gradient descent, and ‘saga’ uses its unbiased and more flexible version named SAGA. Both methods use an iterative procedure, and are often faster than other solvers when both n_samples and n_features are large. Note that ‘sag’ and ‘saga’ fast convergence is only guaranteed on features with approximately the same scale
+

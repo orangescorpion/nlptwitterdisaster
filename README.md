@@ -42,6 +42,7 @@ Outputs are between -1 and 1 and classification is based on greater than or less
 ### Multiclass prediction
 In multiclass prediction, each class is treated as a separate binary outcome.
 ### Parameters (scikit-learn)
+https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RidgeClassifier.html 
 #### alpha
 Alpha is the regularization strength, must be a positive float, larger values correspond to stronger regularization
 #### solver

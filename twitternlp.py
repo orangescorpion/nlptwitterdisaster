@@ -7,6 +7,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from joblib import dump, load
+import tensorflow as tf
+
+optimizer = tf.keras.optimizers.Adam()
 
 # Function for calculating error
 def accuracy(predicted, actual): # Function to return proportion of correct, TODO: false positives / negatives
@@ -75,7 +78,7 @@ ridge_cv = linear_model.RidgeClassifierCV(alphas = (0.1, 0.5, 0.7, 1, 3, 5, 7, 1
 ### NN
 sgd = linear_model.SGDClassifier(loss = "log_loss", max_iter = int(np.ceil((10**6)/len(testy))), penalty = 'l2', alpha = 0.0005) # SGD
 perceptron = linear_model.Perceptron(max_iter = int(np.ceil((10**6)/len(testy))), alpha = 0.000001) # perceptron
-mlp=MLPClassifier(hidden_layer_sizes= (3,3), activation = 'relu', solver = 'sgd', max_iter = 50) # multi layer perceptron
+mlp=MLPClassifier(hidden_layer_sizes= (11000), activation = 'relu', solver = 'adam', max_iter = 50, verbose=True) # multi layer perceptron
 
 # # SGD
 # sgd.fit(holdx, holdy)
@@ -88,9 +91,9 @@ mlp=MLPClassifier(hidden_layer_sizes= (3,3), activation = 'relu', solver = 'sgd'
 # print("Perceptron score: "+ str(perceptron.score(testx, testy)))
 
 # MLP
-mlp.fit(holdx, holdy)
-print("MLP score: " + str(mlp.score(testx, testy)))
-dump(mlp, 'mlp.joblib')
+# mlp.fit(holdx, holdy)
+# print("MLP score: " + str(mlp.score(testx, testy)))
+# dump(mlp, 'mlp.joblib')
 
 # ### Final fitting using best model on submission data
 # sgd.fit(df[df.columns.difference(["target"])], df["target"])

@@ -57,14 +57,14 @@ Solver to use in the computational routines
 ## Running tf from WSL2
 open terminal and launch WSL2:
 ```
-    wsl.exe
+wsl.exe
 ```
 Activate conda and tensorflow environments:
 ```
-    source $HOME/miniconda3/bin/activate
-    conda activate tf
+source $HOME/miniconda3/bin/activate
+conda activate tf
 ```
 Launch VS Code in environment:
 ```
-    code
+code
 ```

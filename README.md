@@ -55,10 +55,16 @@ Solver to use in the computational routines
  - sag: Stochastic Average Gradient descent, and ‘saga’ uses its unbiased and more flexible version named SAGA. Both methods use an iterative procedure, and are often faster than other solvers when both n_samples and n_features are large. Note that ‘sag’ and ‘saga’ fast convergence is only guaranteed on features with approximately the same scale
 
 ## Running tf from WSL2
-open windows terminal and run:
+open terminal and launch WSL2:
 ```
     wsl.exe
+```
+Activate conda and tensorflow environments:
+```
     source $HOME/miniconda3/bin/activate
     conda activate tf
+```
+Launch VS Code in environment:
+```
     code
 ```

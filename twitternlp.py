@@ -74,10 +74,9 @@ ridge_cv = linear_model.RidgeClassifierCV(alphas = (0.1, 0.5, 0.7, 1, 3, 5, 7, 1
 # print("Ridge CV score: "+str(ridge_cv.score(cv_x, cv_y))) # 94.8
 
 ### NN
-nnmodel = tf.keras.Sequential([
-  tf.keras.layers.Dense(30, activation=tf.nn.relu, input_shape=(21360,)),  # input shape required
-  tf.keras.layers.Dense(10, activation=tf.nn.relu),
-  tf.keras.layers.Activation(activation=tf.nn.relu)
+nnmodel = tf.keras.Model([
+  tf.keras.layers.Dense(50, activation=tf.nn.relu, input_shape=(21360,)),  # input shape required
+  tf.keras.layers.Activation(activation=tf.nn.sigmoid)
 ])
 
 nnmodel.compile(optimizer='adam',

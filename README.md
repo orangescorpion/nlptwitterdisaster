@@ -56,8 +56,7 @@ Solver to use in the computational routines
 
 ## Running tf from WSL2
 open windows terminal and run:
-wsl.exe
-source $HOME/miniconda3/bin/activate
-conda activate tf
-
-TODO: GPU setup
+    wsl.exe
+    source $HOME/miniconda3/bin/activate
+    conda activate tf
+    code

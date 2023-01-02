@@ -9,8 +9,6 @@ from sklearn.neighbors import KNeighborsClassifier
 from joblib import dump, load
 import tensorflow as tf
 
-optimizer = tf.keras.optimizers.Adam()
-
 # Function for calculating error
 def accuracy(predicted, actual): # Function to return proportion of correct, TODO: false positives / negatives
     accuracy = 0
@@ -76,24 +74,19 @@ ridge_cv = linear_model.RidgeClassifierCV(alphas = (0.1, 0.5, 0.7, 1, 3, 5, 7, 1
 # print("Ridge CV score: "+str(ridge_cv.score(cv_x, cv_y))) # 94.8
 
 ### NN
-sgd = linear_model.SGDClassifier(loss = "log_loss", max_iter = int(np.ceil((10**6)/len(testy))), penalty = 'l2', alpha = 0.0005) # SGD
-perceptron = linear_model.Perceptron(max_iter = int(np.ceil((10**6)/len(testy))), alpha = 0.000001) # perceptron
-mlp=MLPClassifier(hidden_layer_sizes= (11000), activation = 'relu', solver = 'adam', max_iter = 50, verbose=True) # multi layer perceptron
+nnmodel = tf.keras.Sequential([
+  tf.keras.layers.Dense(30, activation=tf.nn.relu, input_shape=(21360,)),  # input shape required
+  tf.keras.layers.Dense(10, activation=tf.nn.relu),
+  tf.keras.layers.Activation(activation=tf.nn.relu)
+])
 
-# # SGD
-# sgd.fit(holdx, holdy)
-# print("SGD score: "+str(sgd.score(testx, testy)))
-# # TODO: GridSearchCV or RandomizedSearchCV to choose alpha
-# # TODO: data should be scaled to [0,1] or [-1,1] or standardize to mean 0 variance 1 for sgd
+nnmodel.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
 
-# # Perceptron
-# perceptron.fit(holdx, holdy)
-# print("Perceptron score: "+ str(perceptron.score(testx, testy)))
-
-# MLP
-# mlp.fit(holdx, holdy)
-# print("MLP score: " + str(mlp.score(testx, testy)))
-# dump(mlp, 'mlp.joblib')
+nnmodel.fit(holdx, holdy, epochs=50)
+print("Test results:")
+nnmodel.evaluate(testx, testy)
 
 # ### Final fitting using best model on submission data
 # sgd.fit(df[df.columns.difference(["target"])], df["target"])

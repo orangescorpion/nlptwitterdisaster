@@ -17,7 +17,7 @@ for device in devices:
 
 # Data load
 train = pd.read_csv("train.csv", index_col="id") # read training dataset
-test = pd.read_csv("test.csv", index_col="id") # read test dataset
+test = pd.read_csv("test.csv") # read test dataset
 
 ### Data preprocessing
 # TODO: consider stemming/lemmatization
@@ -61,15 +61,23 @@ nnmodel.compile(optimizer='adam',
 # nnmodel.evaluate(testx, testy)
 
 ## Final fitting using best model on submission data
-es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=5)
-nnmodel.fit(full_x, full_y, epochs=150, callbacks=[es])
-nnmodel.save('fullmodel.tf') # Save model
+# es = tf.keras.callbacks.EarlyStopping(monitor='loss', mode='min', verbose=1, patience=5)
+# nnmodel.fit(full_x, full_y, epochs=150, callbacks=[es])
+# nnmodel.save('fullmodel.tf') # Save model
 model = tf.keras.models.load_model('fullmodel.tf')
 results = model.predict(testdf) # Make final predictions
 
-print(model.summary())
-print(type(results))
-print(results.shape)
+# Some wrangling to get data types compatible with dataframes
+id_csv = (test["id"]).values
+results = results.tolist()
+floats = [item for sublist in results for item in sublist]
+target_csv = []
 
-resultsdf = pd.DataFrame({'id': test["id"], 'target': results}) # Create dataframe for submissio
+for x in floats:
+  if x < 0.5:
+    target_csv.append(0)
+  else:
+    target_csv.append(1)
+
+resultsdf = pd.DataFrame({'id': id_csv, 'target': target_csv}) # Create dataframe for submissio
 resultsdf.to_csv('submission.csv', index = False) # Save submission to csv

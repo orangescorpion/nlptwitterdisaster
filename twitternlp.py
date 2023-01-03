@@ -61,7 +61,8 @@ nnmodel.compile(optimizer='adam',
 # nnmodel.evaluate(testx, testy)
 
 ## Final fitting using best model on submission data
-nnmodel.fit(full_x, full_y, epochs=300)
+es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=5)
+nnmodel.fit(full_x, full_y, epochs=150, callbacks=[es])
 nnmodel.save('fullmodel.tf') # Save model
 model = tf.keras.models.load_model('fullmodel.tf')
 results = model.predict(testdf) # Make final predictions

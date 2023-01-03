@@ -3,21 +3,21 @@ import pandas as pd # data processing, I/O
 import numpy as np
 from sklearn import feature_extraction # vectorization
 from sklearn.model_selection import train_test_split
-from joblib import dump, load # to save models
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # stop tensorflow from printing warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # stop tensorflow from printing warnings
 import tensorflow as tf
 
 # Check that tensorflow can access GPU
-gpus = tf.config.list_physical_devices()
-for gpu in gpus:
-    details = tf.config.experimental.get_device_details(gpu)
+devices = tf.config.list_physical_devices()
+for device in devices:
+    details = tf.config.experimental.get_device_details(device)
     print(details.get('device_name'))
-    print(gpu.name)
+    print(device.name)
+## TODO: tensorflow killing when VSCode opened through WSL terminal (using GPU), not locating GPU when opened through desktop.
 
 # Data load
 train = pd.read_csv("train.csv", index_col="id") # read training dataset
-test = pd.read_csv("test.csv") # read test dataset
+test = pd.read_csv("test.csv", index_col="id") # read test dataset
 
 ### Data preprocessing
 # TODO: consider stemming/lemmatization
@@ -44,24 +44,31 @@ testdf = pd.DataFrame(testvectors.toarray())
 
 ### NN
 nnmodel = tf.keras.Sequential([
-  tf.keras.layers.Dense(3000, activation=tf.nn.relu, input_shape=(21360,)),  # input shape required
-  tf.keras.layers.Dropout(0.3, seed=42),
+  tf.keras.layers.Dense(2000, activation=tf.nn.selu, input_shape=(21360,)),  # input shape required
+  tf.keras.layers.Dropout(0.4, seed=42),
+  tf.keras.layers.Dense(1, activation=tf.nn.selu),
   tf.keras.layers.Activation(activation=tf.nn.sigmoid)
 ])
 
 nnmodel.compile(optimizer='adam',
-              loss='sparse_categorical_crossentropy',
+              loss='binary_crossentropy',
               metrics=['accuracy'])
 
-with tf.device('gpu:0'):
-  nnmodel.fit(holdx, holdy, epochs=10)
-print("Test results:")
-nnmodel.evaluate(testx, testy)
+## Fitting on training data
+# with tf.device('gpu:0'):
+#   nnmodel.fit(holdx, holdy, epochs=10)
+# print("Test results:")
+# nnmodel.evaluate(testx, testy)
 
-### Final fitting using best model on submission data
-# sgd.fit(df[df.columns.difference(["target"])], df["target"])
-# results = sgd.predict(testdf)
-# resultsdf = pd.DataFrame({'id': test["id"], 'target': results})
+## Final fitting using best model on submission data
+nnmodel.fit(full_x, full_y, epochs=300)
+nnmodel.save('fullmodel.tf') # Save model
+model = tf.keras.models.load_model('fullmodel.tf')
+results = model.predict(testdf) # Make final predictions
 
-### Save final prediction as submission.csv
-# resultsdf.to_csv('submission.csv', index = False)
+print(model.summary())
+print(type(results))
+print(results.shape)
+
+resultsdf = pd.DataFrame({'id': test["id"], 'target': results}) # Create dataframe for submissio
+resultsdf.to_csv('submission.csv', index = False) # Save submission to csv

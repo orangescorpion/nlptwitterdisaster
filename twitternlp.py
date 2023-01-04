@@ -44,40 +44,43 @@ testdf = pd.DataFrame(testvectors.toarray())
 
 ### NN
 nnmodel = tf.keras.Sequential([
-  tf.keras.layers.Dense(2000, activation=tf.nn.selu, input_shape=(21360,)),  # input shape required
-  tf.keras.layers.Dropout(0.4, seed=42),
-  tf.keras.layers.Dense(1, activation=tf.nn.selu),
-  tf.keras.layers.Activation(activation=tf.nn.sigmoid)
+  tf.keras.layers.Dense(3000, activation=tf.nn.selu, input_shape=(21360,)),  # input shape required
+  tf.keras.layers.Dropout(0.5, seed=42),
+  tf.keras.layers.Dense(20, activation=tf.nn.selu),
+  tf.keras.layers.Dropout(0.5, seed=42),
+  tf.keras.layers.Dense(1, activation=tf.nn.relu)
 ])
 
 nnmodel.compile(optimizer='adam',
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
-## Fitting on training data
+es = tf.keras.callbacks.EarlyStopping(monitor='loss', mode='min', verbose=1, patience=5)
+
+# Fitting on training data with cross validation
 # with tf.device('gpu:0'):
-#   nnmodel.fit(holdx, holdy, epochs=10)
+#   nnmodel.fit(holdx, holdy, epochs=100, callbacks = [es])
 # print("Test results:")
 # nnmodel.evaluate(testx, testy)
 
 ## Final fitting using best model on submission data
-# es = tf.keras.callbacks.EarlyStopping(monitor='loss', mode='min', verbose=1, patience=5)
-# nnmodel.fit(full_x, full_y, epochs=150, callbacks=[es])
-# nnmodel.save('fullmodel.tf') # Save model
+nnmodel.fit(full_x, full_y, epochs=150, callbacks=[es])
+nnmodel.save('fullmodel.tf') # Save model
 model = tf.keras.models.load_model('fullmodel.tf')
 results = model.predict(testdf) # Make final predictions
 
-# Some wrangling to get data types compatible with dataframes
+## Some wrangling to get data types compatible with dataframes
 id_csv = (test["id"]).values
 results = results.tolist()
 floats = [item for sublist in results for item in sublist]
-target_csv = []
 
-for x in floats:
-  if x < 0.5:
-    target_csv.append(0)
-  else:
-    target_csv.append(1)
+## For sigmoid to binary conversion
+# target_csv = []
+# for x in floats:
+#   if x < 0.5:
+#     target_csv.append(0)
+#   else:
+#     target_csv.append(1)
 
-resultsdf = pd.DataFrame({'id': id_csv, 'target': target_csv}) # Create dataframe for submissio
+resultsdf = pd.DataFrame({'id': id_csv, 'target': floats}) # Create dataframe for submissio
 resultsdf.to_csv('submission.csv', index = False) # Save submission to csv

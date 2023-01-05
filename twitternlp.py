@@ -3,22 +3,12 @@ import pandas as pd # data processing, I/O
 import numpy as np # array handling
 from sklearn import feature_extraction # vectorization
 from sklearn.model_selection import train_test_split, GridSearchCV # data split for CV
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # tensorflow verbosity, don't print warnings
 from scikeras.wrappers import KerasClassifier
-import tensorflow as tf
-import keras
-tf.random.set_seed(42) # random seed for replication
+import theano
+import os; os.environ['KERAS_BACKEND'] = 'theano'
+import keras as k
 
-print(keras.backend.backend()) # todo, switch to Theano, see if it helps
-
-# Check that tensorflow can access GPU
-devices = tf.config.list_physical_devices()
-for device in devices:
-    details = tf.config.experimental.get_device_details(device)
-    print(details.get('device_name'))
-    print(device.name)
-# TODO: tensorflow killing when VSCode opened through WSL terminal (using GPU), not locating GPU when opened through desktop.
+print(k.backend.backend()) # todo, switch to Theano, see if it helps
 
 # Data load
 train = pd.read_csv("train.csv", index_col="id") # read training dataset
@@ -47,10 +37,10 @@ testdf = pd.DataFrame(testvectors.toarray())
 
 ## NN model design
 def model_create(neurons):
-  nnmodel = tf.keras.Sequential([
-    tf.keras.layers.Dense(neurons, activation=tf.nn.selu, input_shape=(21360,)),  # input shape required
-    tf.keras.layers.Dropout(0.5, seed=42),
-    tf.keras.layers.Dense(1, activation=tf.nn.sigmoid)
+  nnmodel = k.Sequential([
+    k.layers.Dense(neurons, activation='selu', input_shape=(21360,)),  # input shape required
+    k.layers.Dropout(0.5, seed=42),
+    k.layers.Dense(1, activation='sigmoid')
   ])
   # compile model
   nnmodel.compile(optimizer='adam',
@@ -60,18 +50,17 @@ def model_create(neurons):
 
 # Hyperparameter tuning
 noneurons = [5,10]
-model = KerasClassifier(build_fn=model_create, epochs=100, neurons=noneurons)
-param_grid = dict(neurons=noneurons)
-grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=3)
-grid_result = grid.fit(full_x, full_y)
+model_classifier = KerasClassifier(model=model_create, epochs=50, neurons=10)
 
-best_params=gs.best_params_
-accuracy=gs.best_score_
+parameters = {'batch_size':[15], 'epochs':[50], 'neurons':noneurons}
+grid_search = GridSearchCV(estimator=model_classifier, param_grid=parameters, scoring='accuracy', cv=5, verbose=3)
+grid_search = grid_search.fit(full_x, full_y)
+best_parameters = grid_search.best_params_
+best_accuracy = grid_search.best_score_
+print("Best params: "+best_parameters)
+print("Best accuracy: "+best_accuracy)
 
-print("Best params: "+best_params)
-print("Best score: "+accuracy)
-
-es = tf.keras.callbacks.EarlyStopping(monitor='loss', mode='min', verbose=1, patience=5) # callback to stop training early
+es = k.callbacks.EarlyStopping(monitor='loss', mode='min', verbose=1, patience=5) # callback to stop training early
 
 # Fitting on training data with cross validation
 # with tf.device('gpu:0'): # specify to use GPU rather than CPU

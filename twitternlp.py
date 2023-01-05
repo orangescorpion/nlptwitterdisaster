@@ -28,7 +28,7 @@ df["target"]=pd.Series.to_numpy(train["target"]) # full dataset vectorised with 
 # TODO: consider stemming/lemmatization
 
 # datasets for holdout CV
-train_train, train_test = train_test_split(df, train_size=0.8, random_state=42) #split the dataset
+train_train, train_test = train_test_split(df, train_size=0.7, random_state=42) #split the dataset
 holdx = train_train[train_train.columns.difference(["target"])] # Text data for training
 holdy = pd.Series.to_numpy(train_train["target"]) # predictor for training
 testx = train_test[train_test.columns.difference(["target"])] # Text data for test
@@ -42,11 +42,11 @@ testdf = pd.DataFrame(testvectors.toarray())
 
 ## NN model design
 nnmodel = tf.keras.Sequential([
-  tf.keras.layers.Dense(2000, activation=tf.nn.selu, input_shape=(21360,)),  # input shape required
+  tf.keras.layers.Dense(1000, activation=tf.nn.selu, input_shape=(21360,)),  # input shape required
   tf.keras.layers.Dropout(0.5, seed=42),
-  tf.keras.layers.Dense(10, activation=tf.nn.selu),
+  tf.keras.layers.Dense(10, activation=tf.nn.relu),
   tf.keras.layers.Dropout(0.5, seed=42),
-  tf.keras.layers.Dense(1, activation=tf.nn.relu)
+  tf.keras.layers.Dense(1, activation=tf.nn.sigmoid)
 ])
 
 # compile model
@@ -57,31 +57,31 @@ nnmodel.compile(optimizer='adam',
 es = tf.keras.callbacks.EarlyStopping(monitor='loss', mode='min', verbose=1, patience=5) # callback to stop training early
 
 # Fitting on training data with cross validation
-# with tf.device('gpu:0'): # specify to use GPU rather than CPU
-#   nnmodel.fit(holdx, holdy, epochs=100, callbacks = [es])
-# print("Test results:")
-# nnmodel.evaluate(testx, testy)
+with tf.device('gpu:0'): # specify to use GPU rather than CPU
+  nnmodel.fit(holdx, holdy, epochs=100, callbacks = [es])
+print("Test results:")
+nnmodel.evaluate(testx, testy)
 
 ## Final fitting using best model on submission data
 # nnmodel.fit(full_x, full_y, epochs=200, callbacks=[es])
 # nnmodel.save('fullmodel.tf') # Save model
 
 ## Load model and make final predictions
-model = tf.keras.models.load_model('fullmodel.tf') # load saved model
-results = model.predict(testdf) # Make final predictions
+# model = tf.keras.models.load_model('fullmodel.tf') # load saved model
+# results = model.predict(testdf) # Make final predictions
 
-## Some wrangling to get data types compatible with dataframes
-id_csv = (test["id"]).values
-results = results.tolist()
-floats = [item for sublist in results for item in sublist]
+# ## Some wrangling to get data types compatible with dataframes
+# id_csv = (test["id"]).values
+# results = results.tolist()
+# floats = [item for sublist in results for item in sublist]
 
-# Conversion to binary (for relu the target is anything > 0, for sigmoid it is >= 0.5)
-target_csv = []
-for x in floats:
-  if x > 0:
-    target_csv.append(1)
-  else:
-    target_csv.append(0)
+# # Conversion to binary (for relu the target is anything > 0, for sigmoid it is >= 0.5)
+# target_csv = []
+# for x in floats:
+#   if x >= 0.5:
+#     target_csv.append(1)
+#   else:
+#     target_csv.append(0)
 
-resultsdf = pd.DataFrame({'id': id_csv, 'target': target_csv}) # Create dataframe for submission
-resultsdf.to_csv('submission.csv', index = False) # Save submission as csv
+# resultsdf = pd.DataFrame({'id': id_csv, 'target': target_csv}) # Create dataframe for submission
+# resultsdf.to_csv('submission.csv', index = False) # Save submission as csv

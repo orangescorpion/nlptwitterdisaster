@@ -3,11 +3,14 @@ import pandas as pd # data processing, I/O
 import numpy as np # array handling
 from sklearn import feature_extraction # vectorization
 from sklearn.model_selection import train_test_split, GridSearchCV # data split for CV
-from scikeras.wrappers import KerasClassifier
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # tensorflow verbosity, don't print warnings
+from scikeras.wrappers import KerasClassifier
 import tensorflow as tf
+import keras
 tf.random.set_seed(42) # random seed for replication
+
+print(keras.backend.backend()) # todo, switch to Theano, see if it helps
 
 # Check that tensorflow can access GPU
 devices = tf.config.list_physical_devices()
@@ -43,7 +46,7 @@ testvectors = count_vectorizer.transform(test["text"])
 testdf = pd.DataFrame(testvectors.toarray())
 
 ## NN model design
-def model_create(neurons=1):
+def model_create(neurons):
   nnmodel = tf.keras.Sequential([
     tf.keras.layers.Dense(neurons, activation=tf.nn.selu, input_shape=(21360,)),  # input shape required
     tf.keras.layers.Dropout(0.5, seed=42),
@@ -56,8 +59,9 @@ def model_create(neurons=1):
   return nnmodel
 
 # Hyperparameter tuning
-model = KerasClassifier(build_fn=model_create, epochs=100, batch_size=10, neurons=[5,10])
-param_grid = dict(neurons=[5, 10])
+noneurons = [5,10]
+model = KerasClassifier(build_fn=model_create, epochs=100, neurons=noneurons)
+param_grid = dict(neurons=noneurons)
 grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=3)
 grid_result = grid.fit(full_x, full_y)
 

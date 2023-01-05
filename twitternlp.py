@@ -2,10 +2,12 @@
 import pandas as pd # data processing, I/O
 import numpy as np # array handling
 from sklearn import feature_extraction # vectorization
-from sklearn.model_selection import train_test_split # data split for CV
+from sklearn.model_selection import train_test_split, GridSearchCV # data split for CV
+from scikeras.wrappers import KerasClassifier
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # tensorflow verbosity, don't print warnings
 import tensorflow as tf
+tf.random.set_seed(42) # random seed for replication
 
 # Check that tensorflow can access GPU
 devices = tf.config.list_physical_devices()
@@ -41,26 +43,37 @@ testvectors = count_vectorizer.transform(test["text"])
 testdf = pd.DataFrame(testvectors.toarray())
 
 ## NN model design
-nnmodel = tf.keras.Sequential([
-  tf.keras.layers.Dense(1000, activation=tf.nn.selu, input_shape=(21360,)),  # input shape required
-  tf.keras.layers.Dropout(0.5, seed=42),
-  tf.keras.layers.Dense(10, activation=tf.nn.relu),
-  tf.keras.layers.Dropout(0.5, seed=42),
-  tf.keras.layers.Dense(1, activation=tf.nn.sigmoid)
-])
+def model_create(neurons=1):
+  nnmodel = tf.keras.Sequential([
+    tf.keras.layers.Dense(neurons, activation=tf.nn.selu, input_shape=(21360,)),  # input shape required
+    tf.keras.layers.Dropout(0.5, seed=42),
+    tf.keras.layers.Dense(1, activation=tf.nn.sigmoid)
+  ])
+  # compile model
+  nnmodel.compile(optimizer='adam',
+                loss='binary_crossentropy',
+                metrics=['accuracy'])
+  return nnmodel
 
-# compile model
-nnmodel.compile(optimizer='adam',
-              loss='binary_crossentropy',
-              metrics=['accuracy'])
+# Hyperparameter tuning
+model = KerasClassifier(build_fn=model_create, epochs=100, batch_size=10, neurons=[5,10])
+param_grid = dict(neurons=[5, 10])
+grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=3)
+grid_result = grid.fit(full_x, full_y)
+
+best_params=gs.best_params_
+accuracy=gs.best_score_
+
+print("Best params: "+best_params)
+print("Best score: "+accuracy)
 
 es = tf.keras.callbacks.EarlyStopping(monitor='loss', mode='min', verbose=1, patience=5) # callback to stop training early
 
 # Fitting on training data with cross validation
-with tf.device('gpu:0'): # specify to use GPU rather than CPU
-  nnmodel.fit(holdx, holdy, epochs=100, callbacks = [es])
-print("Test results:")
-nnmodel.evaluate(testx, testy)
+# with tf.device('gpu:0'): # specify to use GPU rather than CPU
+#   nnmodel.fit(holdx, holdy, epochs=100, callbacks = [es])
+# print("Test results:")
+# nnmodel.evaluate(testx, testy)
 
 ## Final fitting using best model on submission data
 # nnmodel.fit(full_x, full_y, epochs=200, callbacks=[es])
